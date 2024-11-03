@@ -1,8 +1,9 @@
-from bs4 import BeautifulSoup
-import requests
-import random
-import time
 import re
+import time
+import random
+import requests
+from bs4 import BeautifulSoup
+from requests import RequestException
 
 # List of user agents from https://www.whatismybrowser.com/guides/the-latest-user-agent/.
 user_agents = [
@@ -34,7 +35,7 @@ proxies = [
 
 
 def scrape_hot_questions():
-    """Function to para realizar scraping en StackExchange"""
+    """Function to scrap StackExchange"""
     # Get random config.
     headers = {'User-Agent': random.choice(user_agents)}
     proxy = {'http': random.choice(proxies)}
@@ -67,20 +68,47 @@ def scrape_hot_questions():
             # Extracting meta info and structuring it
             display_additional_information(container)
 
-    except requests.RequestException as e:
+    except RequestException as e:
         print(f"Error during request: {e}")
 
 
 def get_response(url, headers, proxy, timeout=10):
+    """
+    Sends an HTTP GET request to the specified URL with the provided headers, proxy, and timeout.
+
+    Parameters:
+        url (str): The URL to request data from.
+        headers (dict): The HTTP headers to use for the request.
+        proxy (dict): Proxy settings for the request, which may help to evade IP-based restrictions.
+        timeout (int): The maximum time in seconds to wait for a response (default is 10 seconds).
+
+    Returns:
+        response (Response): The response object if the request was successful (status code 200).
+        None: If the request fails (non-200 status code).
+    """
     response = requests.get(url, headers=headers, proxies=proxy, timeout=timeout)
     if response.status_code != 200:
-        print(f"Error during response: {response.status_code}")
-        return
+        raise RequestException(f"Error during response: {response.status_code}")
     return response
 
 
-# Todo: Reyes
+# Todo: Reyes, need to improve regex for user_info and site_info (in progress).
 def display_additional_information(container):
+    """
+    Extracts and displays structured metadata from a question container.
+
+    Parameters:
+        container (Tag): A BeautifulSoup Tag object representing a question container from which
+                         metadata information will be extracted.
+
+    Metadata Displayed:
+        - Answers: The number of answers available for the question.
+        - Asked: The relative time when the question was posted.
+
+    Notes:
+        Additional fields such as the user's name and the site can be enabled by uncommenting
+        the corresponding lines in the function.
+    """
     meta_data = container.find("div", class_="metaInfo")
     if meta_data:
         meta_data = meta_data.get_text(separator=" | ", strip=True)
@@ -104,4 +132,4 @@ def display_additional_information(container):
 
 if __name__ == '__main__':
     scrape_hot_questions()
-    # Todo: Reyes, console app.
+    # Todo: Reyes, console app (in progress).
