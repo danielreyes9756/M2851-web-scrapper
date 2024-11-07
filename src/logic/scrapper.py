@@ -20,16 +20,19 @@ def scrape_hot_questions():
             WebDriverWait(driver, 10).until(
                 ec.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            soup = BeautifulSoup(driver.page_source1, 'html.parser')
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
             question_containers = soup.find_all("div", class_="question-container")
             for container in question_containers:
                 question_data = extract_question_data(container)
                 questions_data.append(question_data)
             try:
-                # Todo: Reyes, only working 2 pages.
-                next_button = driver.find_element(By.LINK_TEXT, "next")
-                if next_button.is_displayed() and next_button.is_enabled():
-                    next_button.click()
+                next_button = driver.find_elements(By.XPATH, "//a[@rel='next']//span[@class='page-numbers next']")
+                if not next_button:
+                    print("Not Found button 'next' -- ¡¡ Finish !!")
+                    break
+                if next_button[0].is_displayed() and next_button[0].is_enabled():
+                    driver.execute_script("arguments[0].scrollIntoView(true);", next_button[0])
+                    next_button[0].click()
                     time.sleep(random.uniform(1, 3))
                 else:
                     print("No more pages or 'next' button is not interactable.")
