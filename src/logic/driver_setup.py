@@ -16,7 +16,9 @@ def __setup_driver(proxy=None):
     chrome_options.add_argument(f'user-agent={get_random_headers()["User-Agent"]}')
 
     # Todo: Reyes, tmp solution.
-    service = ChromeService(executable_path='C:/Users/danie/Downloads/chromedriver-win64/chromedriver.exe')
+    pathL='./chromedriver-win64/chromedriver.exe'
+    pathD='C:/Users/danie/Downloads/chromedriver-win64/chromedriver.exe'
+    service = ChromeService(executable_path=pathL)
     return webdriver.Chrome(service=service, options=chrome_options)
 
 
